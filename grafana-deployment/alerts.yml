@@ -1,0 +1,17 @@
+groups:
+  - name: http_alerts
+    rules:
+      - alert: High400ResponseRate
+        expr: |
+          (
+            sum(rate(http_requests_total{status="400"}[24h])) 
+            / sum(rate(http_requests_total[24h]))
+          ) > (10 / 15)
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High ratio of 400 responses (10:5) in the last 24 hours"
+          description: "The web application has had a high number of 400 responses."
+          runbook: |
+            python send_teams_alert.py <TEAMS_WEBHOOK_URL>               "High 400 response rate alert: HTTP 400 errors exceeded the threshold."
